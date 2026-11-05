@@ -70,3 +70,72 @@ class Notification(Base):
     message = Column(String(500), nullable=False)
     is_read = Column(Boolean, default=False)
     created_at = Column(DateTime, default=utc_now)
+
+class WorkoutPlan(Base):
+    __tablename__ = "workout_plans"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(
+        Integer,
+        ForeignKey("users.id"),
+        nullable=False
+    )
+    title = Column(String(150), nullable=False)
+    description = Column(String(500), nullable=True)
+    scheduled_date = Column(Date, nullable=False)
+    created_at = Column(DateTime, default=utc_now)
+
+    user = relationship("User")
+
+class Exercise(Base):
+    __tablename__ = "exercises"
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String(150), nullable=False)
+    category = Column(String(30), nullable=False)
+    description = Column(String(500), nullable=True)
+    duration = Column(Integer, nullable=False)
+
+class Streak(Base):
+    __tablename__ = "streaks"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(
+        Integer,
+        ForeignKey("users.id"),
+        unique=True,
+        nullable=False
+    )
+    current_streak = Column(Integer, default=0)
+    longest_streak = Column(Integer, default=0)
+    last_workout_date = Column(Date, nullable=True)
+
+    user = relationship("User")
+
+class Badge(Base):
+    __tablename__ = "badges"
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String(100), unique=True, nullable=False)
+    description = Column(String(500))
+    icon = Column(String(100))
+
+
+class UserBadge(Base):
+    __tablename__ = "user_badges"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(
+        Integer,
+        ForeignKey("users.id"),
+        nullable=False
+    )
+    badge_id = Column(
+        Integer,
+        ForeignKey("badges.id"),
+        nullable=False
+    )
+    earned_at = Column(DateTime, default=utc_now)
+
+    user = relationship("User")
+    badge = relationship("Badge")
