@@ -1,6 +1,5 @@
 
-from datetime import datetime, timezone
-
+from datetime import datetime, date
 from sqlalchemy import (
     Column, Integer, String, Float,
     Date, DateTime, Boolean, ForeignKey
@@ -8,7 +7,7 @@ from sqlalchemy import (
 from sqlalchemy.orm import relationship
 
 from database import Base
-
+from sqlalchemy import Boolean
 
 def utc_now():
     return datetime.now(timezone.utc)
@@ -139,3 +138,45 @@ class UserBadge(Base):
 
     user = relationship("User")
     badge = relationship("Badge")
+
+class Meal(Base):
+    __tablename__ = "meals"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    meal_type = Column(String, nullable=False)
+    food_name = Column(String, nullable=False)
+    calories = Column(Float, nullable=False)
+    protein = Column(Float, default=0)
+    carbs = Column(Float, default=0)
+    fats = Column(Float, default=0)
+    created_at = Column(DateTime, default=utc_now)
+
+    user = relationship("User")
+
+class WaterTracking(Base):
+    __tablename__ = "water_tracking"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    quantity = Column(Integer, nullable=False)
+    date = Column(Date, nullable=False, default=date.today)
+
+    user = relationship("User")
+
+class Reminder(Base):
+    __tablename__ = "reminders"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(
+        Integer,
+        ForeignKey("users.id"),
+        nullable=False
+    )
+    reminder_type = Column(String(30), nullable=False)
+    title = Column(String(150), nullable=False)
+    reminder_time = Column(String(5), nullable=False)
+    is_active = Column(Boolean, default=True, nullable=False)
+    created_at = Column(DateTime, default=utc_now)
+
+    user = relationship("User")

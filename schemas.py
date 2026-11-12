@@ -1,8 +1,10 @@
 
-from datetime import date, datetime
-from typing import Literal
+from datetime import date as DateType, datetime
+from enum import Enum
+from typing import Literal, Optional
 
 from pydantic import BaseModel, Field, ConfigDict, EmailStr
+
 
 
 class UserCreate(BaseModel):
@@ -30,24 +32,25 @@ class Token(BaseModel):
     token_type: str = "bearer"
 
 
+
 class WorkoutCreate(BaseModel):
     workout_name: str = Field(min_length=1, max_length=100)
     category: str = Field(min_length=1, max_length=30)
     duration: int = Field(gt=0)
     calories_burned: float = Field(default=0, ge=0)
-    workout_date: date
+    workout_date: DateType
 
 
 class WorkoutUpdate(BaseModel):
-    workout_name: str | None = Field(
+    workout_name: Optional[str] = Field(
         default=None, min_length=1, max_length=100
     )
-    category: str | None = Field(
+    category: Optional[str] = Field(
         default=None, min_length=1, max_length=30
     )
-    duration: int | None = Field(default=None, gt=0)
-    calories_burned: float | None = Field(default=None, ge=0)
-    workout_date: date | None = None
+    duration: Optional[int] = Field(default=None, gt=0)
+    calories_burned: Optional[float] = Field(default=None, ge=0)
+    workout_date: Optional[DateType] = None
 
 
 class WorkoutResponse(WorkoutCreate):
@@ -58,10 +61,11 @@ class WorkoutResponse(WorkoutCreate):
     model_config = ConfigDict(from_attributes=True)
 
 
+
 class ProgressCreate(BaseModel):
     total_workouts: int = Field(default=0, ge=0)
     total_calories: float = Field(default=0, ge=0)
-    date: date
+    date: DateType
 
 
 class ProgressResponse(ProgressCreate):
@@ -71,20 +75,22 @@ class ProgressResponse(ProgressCreate):
     model_config = ConfigDict(from_attributes=True)
 
 
+
+
 class GoalCreate(BaseModel):
     goal_type: str = Field(min_length=1, max_length=30)
     target_value: float = Field(gt=0)
     current_value: float = Field(default=0, ge=0)
-    deadline: date
+    deadline: DateType
 
 
 class GoalUpdate(BaseModel):
-    goal_type: str | None = Field(
+    goal_type: Optional[str] = Field(
         default=None, min_length=1, max_length=30
     )
-    target_value: float | None = Field(default=None, gt=0)
-    current_value: float | None = Field(default=None, ge=0)
-    deadline: date | None = None
+    target_value: Optional[float] = Field(default=None, gt=0)
+    current_value: Optional[float] = Field(default=None, ge=0)
+    deadline: Optional[DateType] = None
 
 
 class GoalResponse(GoalCreate):
@@ -93,6 +99,8 @@ class GoalResponse(GoalCreate):
     created_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
+
+
 
 
 class NotificationCreate(BaseModel):
@@ -109,12 +117,14 @@ class NotificationResponse(NotificationCreate):
     model_config = ConfigDict(from_attributes=True)
 
 
+
+
 class WorkoutPlanCreate(BaseModel):
     title: str = Field(min_length=1, max_length=150)
-    description: str | None = Field(
+    description: Optional[str] = Field(
         default=None, max_length=500
     )
-    scheduled_date: date
+    scheduled_date: DateType
 
 
 class WorkoutPlanResponse(WorkoutPlanCreate):
@@ -125,10 +135,12 @@ class WorkoutPlanResponse(WorkoutPlanCreate):
     model_config = ConfigDict(from_attributes=True)
 
 
+
+
 class ExerciseCreate(BaseModel):
     name: str = Field(min_length=1, max_length=150)
     category: Literal["Cardio", "Strength", "Yoga"]
-    description: str | None = Field(
+    description: Optional[str] = Field(
         default=None, max_length=500
     )
     duration: int = Field(gt=0)
@@ -140,21 +152,25 @@ class ExerciseResponse(ExerciseCreate):
     model_config = ConfigDict(from_attributes=True)
 
 
+
+
 class StreakResponse(BaseModel):
     id: int
     user_id: int
     current_streak: int
     longest_streak: int
-    last_workout_date: date | None
+    last_workout_date: Optional[DateType]
 
     model_config = ConfigDict(from_attributes=True)
+
+
 
 
 class BadgeResponse(BaseModel):
     id: int
     name: str
-    description: str | None
-    icon: str | None
+    description: Optional[str]
+    icon: Optional[str]
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -165,5 +181,68 @@ class UserBadgeResponse(BaseModel):
     badge_id: int
     earned_at: datetime
     badge: BadgeResponse
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+
+
+class MealType(str, Enum):
+    BREAKFAST = "Breakfast"
+    LUNCH = "Lunch"
+    DINNER = "Dinner"
+    SNACKS = "Snacks"
+
+
+class MealCreate(BaseModel):
+    meal_type: MealType
+    food_name: str = Field(min_length=1, max_length=150)
+    calories: float = Field(ge=0)
+    protein: float = Field(default=0, ge=0)
+    carbs: float = Field(default=0, ge=0)
+    fats: float = Field(default=0, ge=0)
+
+
+class MealResponse(MealCreate):
+    id: int
+    user_id: int
+    created_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+
+class WaterCreate(BaseModel):
+    quantity: int = Field(gt=0, le=10000)
+    date: Optional[DateType] = None
+
+
+class WaterResponse(BaseModel):
+    id: int
+    user_id: int
+    quantity: int
+    date: DateType
+
+    model_config = ConfigDict(from_attributes=True)
+
+from datetime import time as TimeType
+from typing import Literal
+
+
+class ReminderCreate(BaseModel):
+    reminder_type: Literal["Workout", "Meal", "Water"]
+    title: str = Field(min_length=1, max_length=150)
+    reminder_time: TimeType
+    is_active: bool = True
+
+
+class ReminderResponse(BaseModel):
+    id: int
+    user_id: int
+    reminder_type: str
+    title: str
+    reminder_time: str
+    is_active: bool
+    created_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
